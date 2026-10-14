@@ -1,33 +1,16 @@
-import { useEffect, useState } from 'react';
-import { getJson } from '../api/client.js';
+import type { ReactNode } from 'react';
 
-type Props = { title: string; description: string; path: string; emptyText?: string; renderItem?: (item: Record<string, unknown>, index: number) => React.ReactNode };
+type Props = {
+  title: string;
+  description: string;
+  emptyText?: string;
+  loading?: boolean;
+  error?: string | null;
+  items?: Record<string, unknown>[];
+  renderItem?: (item: Record<string, unknown>, index: number) => ReactNode;
+};
 
-export function CapabilityCard({ title, description, path, emptyText, renderItem }: Props) {
-  const [items, setItems] = useState<Record<string, unknown>[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const payload = await getJson<Record<string, unknown>>(path);
-        const values = Object.values(payload)[0];
-        const nextItems = Array.isArray(values) ? values as Record<string, unknown>[] : [];
-        if (active) setItems(nextItems);
-      } catch (caught) {
-        if (active) setError(caught instanceof Error ? caught.message : 'Unable to load data');
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
-
-    return () => { active = false; };
-  }, [path]);
-
+export function CapabilityCard({ title, description, emptyText, loading = false, error = null, items = [], renderItem }: Props) {
   const hasItems = items.length > 0;
 
   return (
